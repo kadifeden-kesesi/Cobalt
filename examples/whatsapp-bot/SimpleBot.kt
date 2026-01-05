@@ -1,4 +1,4 @@
-package it.auties.analyzer
+package com.github.auties00.examples
 
 import it.auties.whatsapp.api.QrHandler
 import it.auties.whatsapp.api.Whatsapp

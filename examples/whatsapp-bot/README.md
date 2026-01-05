@@ -14,7 +14,7 @@ Basit otomatik cevap botu.
 
 **Çalıştırma:**
 ```bash
-mvn compile exec:java -Dexec.mainClass="it.auties.analyzer.SimpleBotKt"
+mvn compile exec:java -Dexec.mainClass="com.github.auties00.examples.SimpleBotKt"
 ```
 
 ### 2. AdvancedBot.kt
@@ -28,7 +28,7 @@ Komut satırı arayüzü ile mesaj gönderme.
 
 **Çalıştırma:**
 ```bash
-mvn compile exec:java -Dexec.mainClass="it.auties.analyzer.AdvancedBotKt"
+mvn compile exec:java -Dexec.mainClass="com.github.auties00.examples.AdvancedBotKt"
 ```
 
 **Komutlar:**
