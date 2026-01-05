@@ -1,6 +1,6 @@
 package it.auties.analyzer
 
-import com.github.auties00.cobalt.node.Node
+import it.auties.whatsapp.model.node.Node
 
 fun onMessageSent(node: Node) {
     println("Sent Binary Message: $node")
