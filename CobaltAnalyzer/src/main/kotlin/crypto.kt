@@ -4,6 +4,7 @@ import it.auties.whatsapp.io.BinaryDecoder
 import it.auties.whatsapp.model.node.Node
 import org.openqa.selenium.devtools.v143.network.model.WebSocketFrameReceived
 import org.openqa.selenium.devtools.v143.network.model.WebSocketFrameSent
+import java.io.ByteArrayInputStream
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
@@ -70,16 +71,14 @@ private fun tryDecodeNode(
         .firstNotNullOfOrNull { hypotheticalCounter -> decodeNode(hypotheticalCounter, it, key, request) }
 }
 
-private fun decodeNode(counter: Long, decoded: ByteArray, key: ByteArray, request: Boolean) = runCatching {
+private fun decodeNode(counter: Long, decoded: ByteArray, key: ByteArray, request: Boolean): Node? = runCatching {
     val plainText = decryptAesGcm(counter, decoded, key)
-    val decoder = BinaryDecoder(plainText)
-    val node = decoder.decode()
+    val node = BinaryDecoder.decode(ByteArrayInputStream(plainText))
     if (request) {
         onMessageSent(node)
     } else {
         onMessageReceived(node)
     }
-
     node
 }.getOrNull()
 
