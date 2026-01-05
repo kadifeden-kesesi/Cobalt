@@ -1,11 +1,13 @@
 package it.auties.analyzer
 
-import it.auties.whatsapp.binary.BinaryDecoder
-import it.auties.whatsapp.crypto.AesGcm
+import it.auties.whatsapp.io.BinaryDecoder
 import it.auties.whatsapp.model.node.Node
 import org.openqa.selenium.devtools.v143.network.model.WebSocketFrameReceived
 import org.openqa.selenium.devtools.v143.network.model.WebSocketFrameSent
 import java.util.*
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import kotlin.math.max
 
 fun handleReceivedMessage(msg: WebSocketFrameReceived) {
@@ -69,7 +71,7 @@ private fun tryDecodeNode(
 }
 
 private fun decodeNode(counter: Long, decoded: ByteArray, key: ByteArray, request: Boolean) = runCatching {
-    val plainText = AesGcm.decrypt(counter, decoded, key)
+    val plainText = decryptAesGcm(counter, decoded, key)
     val decoder = BinaryDecoder(plainText)
     val node = decoder.decode()
     if (request) {
@@ -80,3 +82,30 @@ private fun decodeNode(counter: Long, decoded: ByteArray, key: ByteArray, reques
 
     node
 }.getOrNull()
+
+/**
+ * Custom AES-GCM decryption implementation since AesGcm class was removed in v0.0.10
+ */
+private fun decryptAesGcm(counter: Long, data: ByteArray, key: ByteArray): ByteArray {
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    val secretKey = SecretKeySpec(key, "AES")
+    val iv = createGcmIv(counter)
+    cipher.init(Cipher.DECRYPT_MODE, secretKey, iv)
+    return cipher.doFinal(data)
+}
+
+/**
+ * Creates GCM IV from counter (same format as WhatsApp protocol)
+ */
+private fun createGcmIv(counter: Long): GCMParameterSpec {
+    val iv = ByteArray(12)
+    iv[4] = (counter shr 56).toByte()
+    iv[5] = (counter shr 48).toByte()
+    iv[6] = (counter shr 40).toByte()
+    iv[7] = (counter shr 32).toByte()
+    iv[8] = (counter shr 24).toByte()
+    iv[9] = (counter shr 16).toByte()
+    iv[10] = (counter shr 8).toByte()
+    iv[11] = counter.toByte()
+    return GCMParameterSpec(128, iv)
+}
